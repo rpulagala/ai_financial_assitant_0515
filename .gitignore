@@ -1,0 +1,17 @@
+# Secrets - never commit these
+secrets.env
+.env
+
+# Python
+__pychase__/
+*.pyc 
+*.pyo 
+
+# Virtual environments
+venv/ 
+.venv/
+
+# OS clutter
+.DS_Store
+Thumbs.db
+

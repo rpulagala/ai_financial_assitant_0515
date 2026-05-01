@@ -1,0 +1,18 @@
+>> in terminal (after Claude access)
+git init
+git status
+
+git add .
+git commit -m "My First commit"
+
+------in browser----
+add a git repo on GitHub.com
+get the https:// (ex: https://github.com/rpulagala/claudecodegithubtesting.git)
+
+------- in terminal ----
+git remote add origin https://github.com/rpulagala/claudecodegithubtesting.git
+
+git push -u origin main
+error --- fix error
+
+
