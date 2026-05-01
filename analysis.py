@@ -13,6 +13,7 @@ scores = {
     "Jake": 67,
     "Karen": 91,
     "Leo": 83,
+    "Ohtani": 99,
     "Raj": 99,
 }
 
