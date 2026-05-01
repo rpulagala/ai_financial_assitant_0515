@@ -13,7 +13,7 @@ scores = {
     "Jake": 67,
     "Karen": 91,
     "Leo": 83,
-    "Raj": 100,
+    "Raj": 99,
 }
 
 values = list(scores.values())
