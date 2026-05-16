@@ -50,7 +50,7 @@ def render(la_id: int, fy_id: int, la_name: str, year: int):
             },
         ))
         fig_gauge.update_layout(height=280, margin=dict(t=40, b=10))
-        st.plotly_chart(fig_gauge, use_container_width=True)
+        st.plotly_chart(fig_gauge, width="stretch")
 
     with col_donut:
         labels = ["Mandated", "Committed (not mandated)", "Available"]
@@ -66,7 +66,7 @@ def render(la_id: int, fy_id: int, la_name: str, year: int):
             hole=0.4,
         )
         fig_donut.update_layout(height=280, margin=dict(t=40, b=10))
-        st.plotly_chart(fig_donut, use_container_width=True)
+        st.plotly_chart(fig_donut, width="stretch")
 
     # Chapter breakdown bar chart
     chapters = get_chapter_breakdown(session, la_id, fy_id)
@@ -86,7 +86,7 @@ def render(la_id: int, fy_id: int, la_name: str, year: int):
             },
         )
         fig_bar.update_layout(height=360, margin=dict(t=40, b=20))
-        st.plotly_chart(fig_bar, use_container_width=True)
+        st.plotly_chart(fig_bar, width="stretch")
 
     st.divider()
 
@@ -100,9 +100,11 @@ def render(la_id: int, fy_id: int, la_name: str, year: int):
             st.success(f"{n} alert(s) generated.")
             st.rerun()
 
+    _sev_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
     alerts = session.query(Alert).filter_by(
         local_authority_id=la_id, fiscal_year_id=fy_id, status="open"
-    ).order_by(Alert.severity).all()
+    ).all()
+    alerts.sort(key=lambda a: _sev_order.get(a.severity, 99))
 
     severity_colors = {"critical": "🔴", "high": "🟠", "medium": "🟡", "low": "🟢"}
     if alerts:

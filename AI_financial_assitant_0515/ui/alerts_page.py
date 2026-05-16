@@ -59,7 +59,7 @@ def render(la_id: int, fy_id: int, la_name: str, year: int):
             title="Alerts by Severity",
         )
         fig.update_layout(showlegend=False, height=280)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     with col2:
         type_counts = df["type"].value_counts().reset_index()
@@ -69,7 +69,7 @@ def render(la_id: int, fy_id: int, la_name: str, year: int):
             title="Alerts by Type", hole=0.35,
         )
         fig2.update_layout(height=280)
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, width="stretch")
 
     st.divider()
 
