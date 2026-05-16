@@ -1,0 +1,1526 @@
+Project: AI Financial Assistant
+
+Summary
+# Developer-Oriented Summary — AI Financial Assistant for Local Governments
+
+## 1. Product Objective
+
+The project is to build a sovereign, secure, vertical AI financial assistant for local governments, including municipalities, inter-municipal bodies, and other public local authorities.
+
+The goal is not to replace existing public finance software. The product must act as an intelligence layer above existing systems. It should allow users to import or connect financial data, structure it, query it in natural language, detect anomalies, generate dashboards, and produce usable reports or decision notes.
+
+The assistant must help finance teams, chief administrative officers, elected officials, service managers, management controllers, consultants, and outsourced finance directors understand and exploit financial data more easily.
+
+The product must provide reliable, sourced, explainable, and actionable answers. Every figure must be traceable to a source. Every calculation must be explainable. If the data are missing, incomplete, contradictory, or outside the user’s access rights, the assistant must refuse to answer or clearly state its limits.
+
+The solution should start with a prototype based on Excel/CSV imports, then evolve into a web MVP, then into a scalable SaaS or private deployment architecture with connectors, APIs, advanced dashboards, RAG, and reporting features.
+
+---
+
+## 2. Core User Problem
+
+Local governments already have a lot of financial data, but this data is often scattered across several tools and file formats. Finance teams frequently need to export Excel files, clean data, reconcile tables, manually check inconsistencies, and produce notes under time pressure.
+
+The main operational problems to solve are:
+
+1. difficulty obtaining a consolidated financial view quickly;
+2. dependence on Excel exports and manual reprocessing;
+3. difficulty explaining differences between voted budget, opened credits, committed amounts, mandated amounts, paid amounts, and available credits;
+4. lack of early warning alerts on budget risks;
+5. time-consuming production of notes for executives and elected officials;
+6. poor readability of financial data for service managers and non-financial users;
+7. heterogeneous software and data formats;
+8. weak internal control tooling.
+
+The product must therefore provide a practical interface between raw financial data and business decision-making.
+
+---
+
+## 3. Product Positioning for Development
+
+The product must be designed as a vertical business assistant, not a generic chatbot.
+
+A generic chatbot can generate plausible text. This product must:
+
+1. use real internal data;
+2. cite the sources used;
+3. explain calculations;
+4. distinguish facts, analysis, and recommendations;
+5. refuse unsupported answers;
+6. apply local public finance business rules;
+7. respect user permissions;
+8. isolate each local authority’s data;
+9. generate usable deliverables;
+10. maintain logs and audit trails.
+
+For developers, this means the application must not be built around the LLM alone. The core system must include:
+
+* a structured data model;
+* an ingestion and mapping engine;
+* a rules engine;
+* a document indexing and retrieval system;
+* a controlled AI orchestration layer;
+* dashboards;
+* export generation;
+* user and permission management;
+* logging and observability.
+
+The LLM should be treated as one component within a controlled architecture.
+
+---
+
+## 4. Priority MVP Scope
+
+The MVP must demonstrate business value quickly, with a limited and realistic scope.
+
+### MVP must include:
+
+* Excel and CSV import;
+* secure file upload;
+* semi-automatic column mapping;
+* basic data quality checks;
+* data normalization;
+* budget, commitments, mandates, and suppliers as core datasets;
+* business AI chat;
+* sourced answers;
+* calculation explanations;
+* refusal when data are missing;
+* simple anomaly alerts;
+* dashboards for budget execution, commitments, mandates, and suppliers;
+* note generation;
+* Excel, Word, and PDF exports;
+* basic user management;
+* import logs;
+* conversation logs;
+* strict separation by local authority.
+
+### MVP should exclude:
+
+* full API integration with all software vendors;
+* real-time synchronization;
+* advanced financial forecasting;
+* official regulatory document production;
+* automatic correction in source systems;
+* automated accounting entries;
+* direct DGFiP access;
+* certified scoring;
+* replacement of human expertise.
+
+The first product version should focus on **budget execution, commitments, mandates, suppliers, simple alerts, and note generation**.
+
+---
+
+## 5. Main User Profiles to Support
+
+The system should support multiple user profiles, but the MVP can prioritize finance directors, chief administrative officers, finance agents, and service managers.
+
+### Finance Director / Finance Manager
+
+Needs advanced financial analysis, dashboards, alerts, reliable calculations, and fast note generation.
+
+Typical questions:
+
+* What is the current budget execution rate?
+* Which chapters are drifting?
+* Which commitments remain open?
+* Which credits may be insufficient by year-end?
+* Which suppliers concentrate anomalies?
+
+Main development requirements:
+
+* high data accuracy;
+* correct distinction between committed, mandated, paid, and available amounts;
+* source traceability;
+* exportable analysis.
+
+### Chief Administrative Officer
+
+Needs executive summaries, risk prioritization, decision notes, and financial trajectory visibility.
+
+Main development requirements:
+
+* synthetic view;
+* risk scoring or risk ranking;
+* clear recommendations with limits;
+* separation between confirmed data and interpretation.
+
+### Elected Official
+
+Needs readable, non-technical explanations.
+
+Main development requirements:
+
+* pedagogical reformulation;
+* simplified notes;
+* charts and key figures;
+* no excessive technical vocabulary.
+
+### Service Manager
+
+Needs to track budget availability and commitments within their own scope.
+
+Main development requirements:
+
+* service-level dashboards;
+* strict access rights;
+* available credit calculation;
+* alerts on overconsumption or open commitments.
+
+### Finance Agent
+
+Needs operational controls and anomaly detection.
+
+Main development requirements:
+
+* filtering;
+* duplicate detection;
+* old commitments;
+* rejected mandates;
+* imputation inconsistencies;
+* exportable control lists.
+
+### External Consultant / Outsourced Finance Director
+
+Needs multi-client diagnostic capabilities.
+
+Main development requirements:
+
+* strict tenant isolation;
+* report generation;
+* reusable diagnostic templates;
+* data source tracking.
+
+---
+
+## 6. Core Use Cases to Implement First
+
+The MVP should not try to implement all use cases immediately. The first technical version should focus on a limited set of high-value use cases.
+
+### Budget execution
+
+The system should answer:
+
+* What is the operating budget execution rate?
+* What is the investment budget execution rate?
+* Which chapters show abnormal consumption?
+* Which articles increased the most compared with the previous year?
+* Which credits are at risk of being insufficient before year-end?
+* Which credits are under-consumed?
+* What are the differences between voted, opened, committed, mandated, paid, and available amounts?
+* Can the system generate a budget execution note?
+
+### Commitments
+
+The system should detect:
+
+* outstanding commitments;
+* commitments older than six months;
+* commitments linked to nearly exhausted credits;
+* possible duplicate commitments;
+* commitments without an associated public contract;
+* services concentrating open commitments.
+
+### Mandates
+
+The system should analyze:
+
+* rejected mandates;
+* recurring rejection reasons;
+* suppliers concentrating rejections;
+* late mandates;
+* mandates above a defined threshold;
+* possible imputation anomalies.
+
+### Suppliers
+
+The system should identify:
+
+* supplier concentration;
+* duplicate third-party records;
+* suppliers with abnormal spending volume;
+* suppliers linked to anomalies;
+* suppliers without contract reference where expected.
+
+### Internal control
+
+The system should provide:
+
+* priority anomalies;
+* control lists;
+* risk labels;
+* simple recommendations;
+* exportable action plans.
+
+---
+
+## 7. Data Ingestion Module
+
+The ingestion module is one of the most important parts of the product.
+
+It must support:
+
+* Excel import;
+* CSV import;
+* secure file upload;
+* future API or connector ingestion;
+* automatic or assisted format recognition;
+* column mapping;
+* required-column detection;
+* data type detection;
+* consistency checks;
+* import history;
+* error logs;
+* versioning.
+
+The system must always preserve the raw imported file. It must never overwrite source data without history. Every transformed dataset must remain linked to the original import.
+
+### Required ingestion behavior
+
+When a user uploads a file, the system should:
+
+1. store the raw file securely;
+2. detect file type;
+3. detect sheet names if Excel;
+4. detect column names;
+5. propose mapping to the internal data model;
+6. identify missing mandatory columns;
+7. detect suspicious values;
+8. normalize formats;
+9. store clean data in structured tables;
+10. generate an import report;
+11. log the operation.
+
+### Import report should include:
+
+* import date;
+* user;
+* local authority;
+* file name;
+* detected data type;
+* number of lines;
+* mapped columns;
+* unmapped columns;
+* missing mandatory columns;
+* invalid values;
+* warnings;
+* quality score;
+* status.
+
+---
+
+## 8. Core Financial Data Model
+
+The data engine must structure local public finance information.
+
+The model must support at least:
+
+* local authority;
+* fiscal year;
+* budget;
+* budget type;
+* operating section;
+* investment section;
+* chapter;
+* article;
+* function;
+* service;
+* operation;
+* voted amount;
+* opened credits;
+* committed amount;
+* mandated amount;
+* paid amount;
+* available amount;
+* commitment;
+* mandate;
+* revenue title;
+* supplier;
+* third party;
+* public contract;
+* imputation;
+* rejection;
+* supporting document;
+* source file;
+* import batch.
+
+### Essential budget concepts
+
+The model must clearly distinguish:
+
+* voted budget;
+* opened credits;
+* committed amount;
+* mandated amount;
+* paid amount;
+* available credits.
+
+This distinction is critical. The system must not confuse these values.
+
+### Recommended core entities
+
+#### LocalAuthority
+
+Represents a municipality, inter-municipal structure, or other public entity.
+
+Fields:
+
+* id;
+* name;
+* SIRET if available;
+* type;
+* tenant identifier;
+* created_at;
+* updated_at.
+
+#### FiscalYear
+
+Fields:
+
+* id;
+* local_authority_id;
+* year;
+* status;
+* start_date;
+* end_date.
+
+#### BudgetLine
+
+Fields:
+
+* id;
+* local_authority_id;
+* fiscal_year_id;
+* budget_name;
+* section;
+* chapter;
+* article;
+* function;
+* service;
+* operation;
+* voted_amount;
+* opened_credits;
+* committed_amount;
+* mandated_amount;
+* paid_amount;
+* available_amount;
+* source_id.
+
+#### Commitment
+
+Fields:
+
+* id;
+* local_authority_id;
+* fiscal_year_id;
+* commitment_number;
+* date;
+* supplier_id;
+* service;
+* chapter;
+* article;
+* object;
+* committed_amount;
+* mandated_amount;
+* remaining_amount;
+* contract_id;
+* operation;
+* status;
+* source_id.
+
+#### Mandate
+
+Fields:
+
+* id;
+* local_authority_id;
+* fiscal_year_id;
+* mandate_number;
+* date;
+* supplier_id;
+* amount;
+* chapter;
+* article;
+* service;
+* imputation;
+* status;
+* rejection_reason;
+* source_id.
+
+#### Supplier
+
+Fields:
+
+* id;
+* local_authority_id;
+* name;
+* SIRET;
+* internal_reference;
+* normalized_name;
+* duplicate_group_id;
+* source_id.
+
+#### PublicContract
+
+Fields:
+
+* id;
+* local_authority_id;
+* contract_number;
+* title;
+* supplier_id;
+* start_date;
+* end_date;
+* maximum_amount;
+* consumed_amount;
+* status;
+* source_id.
+
+#### Alert
+
+Fields:
+
+* id;
+* local_authority_id;
+* fiscal_year_id;
+* alert_type;
+* severity;
+* rule_id;
+* entity_type;
+* entity_id;
+* title;
+* explanation;
+* calculation_details;
+* source_references;
+* recommendation;
+* status;
+* created_at;
+* resolved_at.
+
+#### Source
+
+Fields:
+
+* id;
+* local_authority_id;
+* import_batch_id;
+* file_name;
+* file_type;
+* sheet_name;
+* row_number;
+* original_value;
+* normalized_value;
+* created_at.
+
+---
+
+## 9. Business Rules Engine
+
+The business rules engine must detect financial risks, anomalies, and control points.
+
+The MVP should include simple, explainable rules before adding advanced scoring.
+
+### Priority rules
+
+The rules engine should detect:
+
+1. insufficient credits;
+2. abnormal consumption;
+3. under-consumption;
+4. old outstanding commitments;
+5. commitments not fully mandated;
+6. commitments with no public contract reference;
+7. rejected mandates;
+8. suppliers concentrating large spending;
+9. supplier dependency;
+10. duplicate suppliers;
+11. imputation inconsistencies;
+12. late mandates;
+13. old revenue titles if data exist;
+14. general expenditure drift;
+15. payroll drift if data exist.
+
+### Required output for each alert
+
+Each alert must include:
+
+* rule name;
+* rule category;
+* severity;
+* affected entity;
+* affected lines;
+* calculation;
+* source;
+* explanation;
+* confidence level;
+* recommendation;
+* status.
+
+### Example alert
+
+Alert type: Old outstanding commitment
+Severity: Medium or High
+Condition: commitment date older than six months and remaining amount greater than threshold
+Explanation: “This commitment remains open more than six months after creation and still has a remaining amount of €X.”
+Source: commitment file, line X
+Recommendation: “Verify whether the service has received the goods/services, whether the invoice is pending, or whether the commitment should be closed.”
+
+The rule must be deterministic and auditable. The AI may explain the alert, but the detection should initially come from explicit rules.
+
+---
+
+## 10. Conversational AI Module
+
+The conversational AI module must allow users to ask business questions in natural language.
+
+It must support:
+
+* business-oriented chat;
+* intent classification;
+* retrieval of structured data;
+* retrieval of documents through RAG;
+* sourced answers;
+* calculation explanations;
+* refusal when data are unavailable;
+* reformulation for different user profiles;
+* generation of notes;
+* generation of action plans;
+* response export;
+* conversation history.
+
+### Required answer structure
+
+A recommended answer should contain:
+
+1. short answer;
+2. key figures;
+3. explanation;
+4. sources;
+5. limits;
+6. cautious recommendation;
+7. possible next actions.
+
+### Mandatory guardrails
+
+The assistant must:
+
+* never provide a figure without a source;
+* never invent a document;
+* never invent missing data;
+* explicitly state missing data;
+* distinguish fact, analysis, and recommendation;
+* include calculation details;
+* cite source files or documents;
+* include a confidence level;
+* refuse out-of-scope requests;
+* respect user permissions;
+* log prompts and responses.
+
+### Developer implication
+
+The LLM should not directly query raw databases without control. A safer architecture is:
+
+1. classify user intent;
+2. identify required data;
+3. check permissions;
+4. retrieve structured data through controlled queries;
+5. retrieve relevant documents through RAG if needed;
+6. compute figures through deterministic functions;
+7. pass summarized structured context to the LLM;
+8. generate answer with strict instructions;
+9. validate that the answer contains sources;
+10. log the full interaction.
+
+---
+
+## 11. RAG and Document Management
+
+The RAG module must allow the assistant to answer questions based on uploaded documents.
+
+Documents to index may include:
+
+* budgets;
+* budget amendments;
+* administrative accounts;
+* financial statements;
+* budget orientation reports;
+* deliberations;
+* public contracts;
+* agreements;
+* supporting documents;
+* internal notes;
+* procedures;
+* M57 documentation;
+* audit reports.
+
+### RAG requirements
+
+The RAG system must include:
+
+* indexing by local authority;
+* document metadata;
+* access-right filtering;
+* business-aware chunking;
+* hybrid search;
+* vector search;
+* keyword search;
+* citations;
+* minimum relevance threshold;
+* contradiction handling;
+* source links;
+* document versioning.
+
+### Mandatory metadata
+
+Each document should include:
+
+* document id;
+* local authority id;
+* fiscal year;
+* document type;
+* title;
+* upload date;
+* uploader;
+* source file;
+* confidentiality level;
+* service scope;
+* version;
+* indexed status.
+
+### RAG answer behavior
+
+If the retrieved evidence is weak, the assistant must say so. If documents contradict each other, it must identify the contradiction and avoid giving a definitive answer unless the hierarchy of documents is clear.
+
+The assistant must never use documents from another local authority or another unauthorized service scope.
+
+---
+
+## 12. Dashboard Module
+
+The dashboard module should provide clear visual summaries.
+
+The MVP should include dashboards for:
+
+* budget execution;
+* commitments;
+* mandates;
+* suppliers;
+* alerts;
+* risks;
+* service-level tracking.
+
+Future dashboards may include:
+
+* revenue titles;
+* public contracts;
+* debt;
+* treasury;
+* financial ratios;
+* financial forecasting;
+* elected-official summary.
+
+### Budget dashboard
+
+Should display:
+
+* opened credits;
+* committed amount;
+* mandated amount;
+* paid amount;
+* available credits;
+* execution rate;
+* consumption rate by chapter;
+* top drifting lines;
+* under-consumed lines;
+* risk alerts.
+
+### Commitments dashboard
+
+Should display:
+
+* number of open commitments;
+* total remaining committed amount;
+* old commitments;
+* commitments by service;
+* commitments by supplier;
+* commitments without contract;
+* duplicated or suspicious commitments.
+
+### Mandates dashboard
+
+Should display:
+
+* total mandates;
+* rejected mandates;
+* rejection reasons;
+* rejected mandates by supplier;
+* late mandates;
+* high-value mandates.
+
+### Supplier dashboard
+
+Should display:
+
+* top suppliers by amount;
+* supplier concentration;
+* duplicate suppliers;
+* suppliers linked to rejected mandates;
+* suppliers without contract reference if expected.
+
+### Alert dashboard
+
+Should display:
+
+* alerts by severity;
+* alerts by type;
+* alerts by service;
+* unresolved alerts;
+* action status;
+* export option.
+
+---
+
+## 13. Report and Export Generation
+
+The product must generate operational deliverables, not only chat answers.
+
+Expected exports:
+
+* enriched Excel files;
+* Word notes;
+* PDF reports;
+* anomaly reports;
+* internal control reports;
+* supplier sheets;
+* contract sheets;
+* service sheets;
+* budget execution notes;
+* action plans.
+
+Each report must include:
+
+* date;
+* local authority;
+* scope;
+* fiscal year;
+* source files;
+* indicators;
+* analysis;
+* limits;
+* recommendations;
+* appendices.
+
+### MVP report types
+
+The first reports to implement should be:
+
+1. budget execution note;
+2. old commitments report;
+3. supplier concentration report;
+4. rejected mandates report;
+5. internal control action plan;
+6. executive summary for DGS;
+7. simplified note for elected officials.
+
+### Report generation flow
+
+A recommended flow:
+
+1. user asks question or selects report type;
+2. system identifies required data;
+3. system verifies data availability;
+4. system computes indicators;
+5. system retrieves sources;
+6. system generates draft text;
+7. system displays preview;
+8. user can export to Word/PDF/Excel;
+9. export is logged.
+
+---
+
+## 14. User Management, Roles, and Permissions
+
+The system must support role-based access control.
+
+Typical roles:
+
+* super administrator;
+* local authority administrator;
+* finance director;
+* chief administrative officer;
+* elected official;
+* finance agent;
+* service manager;
+* reader;
+* external consultant;
+* auditor.
+
+### Permission requirements
+
+Permissions must control:
+
+* access to local authority data;
+* access to service-level data;
+* file upload;
+* file deletion;
+* import validation;
+* dashboard access;
+* chat access;
+* report generation;
+* user administration;
+* rule configuration;
+* audit log access.
+
+### Tenant isolation
+
+Tenant isolation is critical. Data from one local authority must never be visible to another.
+
+Every database query must include tenant filtering. Every document retrieval query must include tenant filtering. Every vector search must be filtered by tenant and access rights.
+
+This is a central architectural requirement.
+
+---
+
+## 15. Target Technical Architecture
+
+The target architecture should be modular, API-first, secure by design, observable, and scalable.
+
+### Suggested stack
+
+Frontend:
+
+* React;
+* Next.js;
+* TypeScript.
+
+Backend:
+
+* Python FastAPI or Node.js.
+
+Data processing:
+
+* Python;
+* Pandas;
+* Polars.
+
+Database:
+
+* PostgreSQL.
+
+Vector database:
+
+* Qdrant;
+* Weaviate;
+* pgvector.
+
+File storage:
+
+* S3-compatible storage;
+* sovereign or European cloud storage.
+
+AI:
+
+* Mistral AI;
+* embedding model;
+* chat model.
+
+Authentication:
+
+* OAuth2;
+* OpenID Connect;
+* SSO;
+* MFA.
+
+Observability:
+
+* logs;
+* metrics;
+* traces;
+* cost monitoring;
+* error tracking.
+
+### Logical architecture
+
+User
+→ Frontend
+→ Backend API
+→ Authentication / RBAC
+→ Business engine
+→ PostgreSQL
+→ Rules engine
+→ AI orchestrator
+→ Vector database / RAG
+→ Mistral AI
+→ Export module
+
+Imports / APIs / connectors
+→ Quality checks
+→ Mapping
+→ Raw storage
+→ Normalized database
+
+---
+
+## 16. AI Architecture
+
+The AI layer should be designed as an orchestrated system, not a direct LLM interface.
+
+### Main components
+
+1. intent classifier;
+2. permission checker;
+3. structured data retriever;
+4. document retriever;
+5. calculation engine;
+6. prompt builder;
+7. LLM response generator;
+8. response validator;
+9. citation checker;
+10. logging module.
+
+### AI options
+
+The preferred model provider is Mistral AI or another European AI provider.
+
+Possible deployment strategies:
+
+* API-based for prototype and MVP;
+* European or sovereign cloud for public-sector acceptability;
+* open-weight model for stronger control;
+* private hosting for sensitive deployments.
+
+The architecture should avoid model lock-in. The LLM provider should be abstracted through a model interface.
+
+### Anti-hallucination rules
+
+The system must enforce:
+
+* no figure without source;
+* no invented source;
+* no answer if data are unavailable;
+* explicit limits;
+* calculation details;
+* clear confidence level;
+* separate facts, analysis, recommendations;
+* refusal outside scope;
+* logs for audit;
+* evaluation on test cases.
+
+---
+
+## 17. Security Requirements
+
+Security must be integrated from the beginning.
+
+Required security measures:
+
+* TLS in transit;
+* encryption at rest;
+* secure file storage;
+* MFA;
+* SSO support;
+* role-based access control;
+* tenant isolation;
+* audit logs;
+* import logs;
+* conversation logs;
+* secret rotation;
+* environment separation;
+* backup strategy;
+* disaster recovery plan;
+* incident management;
+* monitoring;
+* reversibility;
+* data retention policy.
+
+### Sensitive data
+
+The system may process:
+
+* supplier data;
+* employee-related financial data;
+* debtor data;
+* aid beneficiary data;
+* contracts;
+* invoices;
+* supporting documents;
+* internal financial notes;
+* decision-making documents.
+
+The design must therefore follow GDPR principles, including minimization, access control, traceability, and retention management.
+
+### Main risks to mitigate
+
+* data leakage;
+* unauthorized access;
+* AI hallucination;
+* wrong interpretation of data;
+* tenant confusion;
+* poor source data quality;
+* unexplainable answer;
+* GDPR non-compliance;
+* service unavailability.
+
+---
+
+## 18. Interoperability Strategy
+
+The product must not depend on immediate API access from existing financial software vendors.
+
+Integration should be progressive.
+
+### Level 1 — Manual import
+
+Users upload Excel or CSV files.
+
+This is the MVP baseline.
+
+### Level 2 — Automated file deposit
+
+Files are periodically deposited in a secure space.
+
+### Level 3 — Semi-automated connector
+
+The system recognizes recurring formats from specific vendors.
+
+### Level 4 — Partner API
+
+Integration through vendor APIs when available.
+
+### Level 5 — Native integration
+
+The product becomes integrated with, or distributed alongside, existing business software.
+
+### Priority data sources
+
+The MVP should prioritize:
+
+* budget;
+* opened credits;
+* commitments;
+* mandates;
+* suppliers;
+* rejected mandates if available.
+
+Later versions may include:
+
+* revenue titles;
+* public contracts;
+* debt;
+* treasury;
+* supporting documents;
+* remaining commitments;
+* fixed assets;
+* invoices.
+
+---
+
+## 19. UX/UI Requirements
+
+The interface must be clear, modern, sober, professional, and suitable for the public sector.
+
+It must serve both expert users and non-technical users.
+
+### Main screens
+
+The product should include:
+
+1. home page;
+2. secure login page;
+3. main dashboard;
+4. AI chat page;
+5. data library;
+6. file import page;
+7. alerts page;
+8. reports page;
+9. history page;
+10. administration page;
+11. settings page;
+12. user management page.
+
+### Chat interface
+
+The chat should include:
+
+* question input;
+* suggested questions;
+* sourced answer;
+* key figures;
+* calculation details;
+* source display;
+* confidence level;
+* action buttons;
+* export button;
+* reformulation button;
+* note generation button;
+* conversation history.
+
+### UX principle
+
+The product should display the synthesis first, then allow the user to drill down into details and sources.
+
+For example:
+
+1. show the main answer;
+2. show key figures;
+3. show explanation;
+4. show source table;
+5. show calculation formula;
+6. allow export.
+
+---
+
+## 20. Import and Mapping UX
+
+The file import workflow must be user-friendly because imported files may vary a lot.
+
+Recommended workflow:
+
+1. user uploads file;
+2. system detects file type;
+3. system previews rows;
+4. system proposes data category;
+5. system maps columns automatically;
+6. user confirms or edits mapping;
+7. system runs quality checks;
+8. system displays warnings;
+9. user validates import;
+10. system stores raw and normalized data;
+11. system generates import report.
+
+The system should save mapping templates by local authority and by file type to reduce repeated manual work.
+
+---
+
+## 21. Logging and Auditability
+
+The product must keep detailed logs.
+
+Required logs:
+
+* user login;
+* file upload;
+* import validation;
+* column mapping;
+* data transformation;
+* rule execution;
+* alert generation;
+* chat question;
+* AI response;
+* sources used;
+* export generation;
+* permission changes;
+* user administration changes.
+
+Logs must be searchable and exportable for audit purposes.
+
+For AI interactions, logs should include:
+
+* user id;
+* role;
+* local authority id;
+* question;
+* intent;
+* data retrieved;
+* documents retrieved;
+* model used;
+* answer;
+* citations;
+* confidence level;
+* timestamp.
+
+---
+
+## 22. Development Roadmap
+
+### Phase 1 — Prototype
+
+Objective: validate feasibility using Excel/CSV files.
+
+Duration: 2 to 3 months.
+
+Build:
+
+* local import;
+* basic mapping;
+* structured model;
+* first indicators;
+* simple rules;
+* experimental chat;
+* basic sourced responses;
+* initial dashboard;
+* first export.
+
+Deliverables:
+
+* prototype;
+* initial data dictionary;
+* MVP backlog;
+* first test dataset;
+* UX mockups.
+
+Validation:
+
+* around 30 priority use cases tested;
+* imported data correctly mapped;
+* answers are sourced;
+* basic alerts are explainable.
+
+### Phase 2 — MVP Web Application
+
+Objective: build a usable web app.
+
+Build:
+
+* authentication;
+* file import workflow;
+* mapping interface;
+* PostgreSQL storage;
+* dashboards;
+* rules engine;
+* AI chat;
+* RAG;
+* exports;
+* user roles;
+* import logs;
+* conversation logs.
+
+Validation:
+
+* real or realistic anonymized data imported;
+* dashboards stable;
+* sourced answers generated;
+* exports usable;
+* tenant isolation tested.
+
+### Phase 3 — Pilot Version
+
+Objective: test with one to three local authorities.
+
+Build:
+
+* improved roles;
+* service-level permissions;
+* enriched rules;
+* report templates;
+* usage tracking;
+* support tools;
+* improved RAG;
+* quality monitoring.
+
+Validation:
+
+* regular use by finance teams;
+* issues logged;
+* rule accuracy improved;
+* user feedback integrated.
+
+### Phase 4 — Industrialization
+
+Objective: prepare for SaaS or private deployment.
+
+Build:
+
+* robust multi-tenancy;
+* advanced monitoring;
+* backup and recovery;
+* scalable architecture;
+* connector framework;
+* onboarding workflow;
+* advanced permissions;
+* AI cost monitoring;
+* security documentation;
+* API documentation.
+
+---
+
+## 23. Developer Priorities
+
+The most important development priorities are:
+
+1. build a reliable ingestion pipeline;
+2. preserve raw files and source traceability;
+3. create a clean financial data model;
+4. implement deterministic calculations;
+5. build simple but explainable rules;
+6. enforce tenant isolation everywhere;
+7. design the AI as an orchestrated module;
+8. require citations and sources;
+9. log every import, alert, chat, and export;
+10. generate usable reports.
+
+The project should not start by building a sophisticated chatbot. It should start by structuring data and ensuring calculations are correct.
+
+---
+
+## 24. Recommended MVP Technical Backlog
+
+### Epic 1 — Authentication and tenant setup
+
+* Create local authority entity.
+* Create users.
+* Assign roles.
+* Implement login.
+* Implement tenant filtering.
+* Implement service-level access where possible.
+
+### Epic 2 — File import
+
+* Upload Excel/CSV.
+* Store raw file.
+* Detect columns.
+* Preview data.
+* Map columns.
+* Validate mapping.
+* Normalize data.
+* Save import batch.
+* Generate import report.
+
+### Epic 3 — Data model
+
+* Create budget line model.
+* Create commitment model.
+* Create mandate model.
+* Create supplier model.
+* Create source reference model.
+* Link all entities to tenant and import batch.
+
+### Epic 4 — Business indicators
+
+* Calculate execution rate.
+* Calculate available credits.
+* Calculate committed rate.
+* Calculate mandated rate.
+* Calculate remaining commitment.
+* Calculate supplier concentration.
+* Calculate old commitments.
+* Calculate rejected mandate statistics.
+
+### Epic 5 — Rules engine
+
+* Create rule registry.
+* Implement old commitment rule.
+* Implement insufficient credit rule.
+* Implement abnormal consumption rule.
+* Implement supplier concentration rule.
+* Implement duplicate supplier rule.
+* Implement rejected mandate rule.
+* Generate alerts.
+* Store alerts.
+* Display alerts.
+
+### Epic 6 — Dashboards
+
+* Budget dashboard.
+* Commitments dashboard.
+* Mandates dashboard.
+* Suppliers dashboard.
+* Alerts dashboard.
+* Filters by fiscal year, service, chapter, supplier.
+
+### Epic 7 — AI chat
+
+* Intent classification.
+* Controlled data retrieval.
+* Calculation explanation.
+* Source citation.
+* Answer generation.
+* Refusal behavior.
+* Conversation history.
+* Export response.
+
+### Epic 8 — RAG
+
+* Upload documents.
+* Extract text.
+* Chunk documents.
+* Generate embeddings.
+* Store vectors.
+* Retrieve documents by tenant and permissions.
+* Display citations.
+* Include sources in AI answers.
+
+### Epic 9 — Reports
+
+* Budget execution note.
+* Old commitments report.
+* Supplier concentration report.
+* Rejected mandates report.
+* Internal control action plan.
+* Export to Word/PDF/Excel.
+
+### Epic 10 — Audit and monitoring
+
+* Import logs.
+* User logs.
+* AI logs.
+* Rule execution logs.
+* Export logs.
+* Error logs.
+* Basic admin dashboard.
+
+---
+
+## 25. Key Technical Principles
+
+The product must follow several non-negotiable principles.
+
+### Source-first architecture
+
+Every number must be linked to a source file, source row, source document, or computed formula.
+
+### Deterministic calculations
+
+Important financial calculations should be performed by backend services, not invented by the LLM.
+
+### AI as explanation layer
+
+The LLM should explain, summarize, reformulate, and draft notes. It should not be the only place where business logic lives.
+
+### Strict tenant isolation
+
+Every request, query, vector search, document access, and export must be filtered by local authority and user permissions.
+
+### No silent failure
+
+If data are missing, the system must say so. If an import is partial, the system must show warnings. If the AI lacks evidence, it must refuse or qualify the answer.
+
+### Auditability
+
+The product must be explainable after the fact: who uploaded what, which data were used, which rule generated which alert, which source supported which answer.
+
+---
+
+## 26. Final Developer Summary
+
+The product to build is a secure vertical financial intelligence platform for local governments.
+
+The first version must allow users to upload Excel/CSV files, map them to a normalized financial data model, compute budget and accounting indicators, detect simple anomalies, query data through an AI assistant, display dashboards, and generate sourced reports.
+
+The most important modules are:
+
+* ingestion;
+* mapping;
+* financial data model;
+* rules engine;
+* AI orchestration;
+* RAG;
+* dashboards;
+* exports;
+* user roles;
+* tenant isolation;
+* logging.
+
+The developer should prioritize correctness, traceability, and security over advanced AI sophistication.
+
+The MVP should prove that the system can answer practical questions such as:
+
+* What is the budget execution rate?
+* Which credits may be insufficient?
+* Which commitments are old and still open?
+* Which suppliers concentrate spending or anomalies?
+* Which mandates were rejected?
+* Can the system generate a sourced note for management or elected officials?
+
+The long-term product can later add connectors, APIs, forecasting, advanced scoring, debt, treasury, procurement, and broader public finance analysis.
+
+But the first technical objective is clear: build a reliable, secure, source-based assistant that transforms imported local government finance data into dashboards, alerts, explanations, and reports.

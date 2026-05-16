@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install *)",
+      "Bash(python -c \"import ast, sys; files = ['database/models.py','database/connection.py','finance/indicators.py','finance/rules.py','ingestion/mapper.py','ingestion/processor.py','ai/orchestrator.py','pages/dashboard.py','pages/import_page.py','pages/chat_page.py','pages/alerts_page.py','app.py']; [ast.parse\\(open\\(f\\).read\\(\\)\\) or print\\(f'OK: {f}'\\) for f in files]; print\\('All files parse OK'\\)\")",
+      "Bash(python -c ' *)",
+      "Bash(python -c \"import os; os.remove\\('financial_assistant.db'\\) if os.path.exists\\('financial_assistant.db'\\) else print\\('No DB to remove'\\)\")",
+      "Bash(streamlit run *)",
+      "Bash(ping -n 5 127.0.0.1)",
+      "Bash(git add *)"
+    ]
+  }
+}
