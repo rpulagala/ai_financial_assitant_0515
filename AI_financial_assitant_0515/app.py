@@ -43,14 +43,31 @@ def load_demo_data(la_id: int, fy_id: int):
     from ingestion.processor import run_import
     session = get_session()
     for path, data_type in SAMPLE_FILES:
-        if not os.path.exists(path):
+        # Support both local dev (relative) and Streamlit Cloud (repo root) paths
+        resolved = path if os.path.exists(path) else os.path.join(
+            os.path.dirname(__file__), path)
+        if not os.path.exists(resolved):
             st.warning(f"Sample file not found: {path}")
             continue
-        with open(path, "rb") as f:
+        with open(resolved, "rb") as f:
             run_import(session=session, file_bytes=f.read(),
                        file_name=os.path.basename(path),
                        la_id=la_id, fy_id=fy_id, data_type=data_type)
     session.close()
+
+
+def auto_seed_if_empty(la_id: int, fy_id: int):
+    """Load sample data and run rules automatically if the DB is empty."""
+    from database.models import BudgetLine
+    from finance.rules import run_all_rules
+    session = get_session()
+    has_data = session.query(BudgetLine).filter_by(
+        local_authority_id=la_id, fiscal_year_id=fy_id
+    ).first()
+    session.close()
+    if not has_data:
+        load_demo_data(la_id, fy_id)
+        run_all_rules(la_id, fy_id)
 
 
 def ensure_demo_tenant() -> tuple[int, int, str, int]:
@@ -78,6 +95,8 @@ st.session_state.setdefault("la_id",   la_id)
 st.session_state.setdefault("fy_id",   fy_id)
 st.session_state.setdefault("la_name", la_name)
 st.session_state.setdefault("year",    year)
+
+auto_seed_if_empty(la_id, fy_id)
 
 
 # ─── Page callables ──────────────────────────────────────────────────────────
