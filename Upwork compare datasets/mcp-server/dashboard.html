@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AAPL – Apple Inc.</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:        #ffffff;
+      --surface:   #f8f9fa;
+      --border:    #e0e0e0;
+      --text:      #202124;
+      --secondary: #3c4043;
+      --muted:     #80868b;
+      --green:     #137333;
+      --green-bg:  #e6f4ea;
+      --red:       #c5221f;
+      --red-bg:    #fce8e6;
+      --blue:      #1a73e8;
+      --chart:     #0b8043;
+      --chart-fill:rgba(11,128,67,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Google Sans', Roboto, -apple-system, Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* ── Loading ── */
+    #loading {
+      position: fixed; inset: 0; background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 14px; z-index: 100;
+    }
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #app { display: none; }
+
+    /* ── Page shell ── */
+    .page { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+
+    /* ── Company header ── */
+    .co-name {
+      font-size: 16px; color: var(--secondary); margin-bottom: 4px;
+    }
+    .price-row {
+      display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+      margin-bottom: 2px;
+    }
+    .price-main { font-size: 40px; font-weight: 400; letter-spacing: -1px; color: var(--text); }
+    .price-change {
+      font-size: 20px; font-weight: 400;
+      padding: 1px 6px; border-radius: 4px;
+    }
+    .price-change.up   { color: var(--green); }
+    .price-change.down { color: var(--red); }
+    .price-meta { font-size: 12px; color: var(--muted); margin-bottom: 20px; }
+
+    hr.divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+    /* ── Chart card ── */
+    .chart-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+    }
+    .chart-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    /* Range buttons — Yahoo Finance style */
+    .range-selector { display: flex; gap: 2px; }
+    .range-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 13px; font-weight: 500; color: var(--muted);
+      padding: 5px 12px; border-radius: 16px; transition: all 0.12s;
+    }
+    .range-btn:hover  { background: var(--surface); color: var(--text); }
+    .range-btn.active { background: #e8f0fe; color: var(--blue); }
+
+    .chart-wrap { height: 300px; position: relative; }
+    .chart-overlay {
+      position: absolute; inset: 0; border-radius: 6px; z-index: 5;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .chart-overlay.loading { background: rgba(255,255,255,0.8); }
+
+    /* ── KPI strip ── */
+    .kpi-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1px; background: var(--border);
+      border: 1px solid var(--border); border-radius: 8px;
+      overflow: hidden; margin-bottom: 24px;
+    }
+    .kpi {
+      background: var(--bg); padding: 16px 20px;
+    }
+    .kpi-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .kpi-value { font-size: 22px; font-weight: 400; color: var(--text); }
+    .kpi-sub   { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    /* ── Two-col sections ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+
+    /* ── Section card ── */
+    .section {
+      border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+    }
+    .section-title {
+      font-size: 13px; font-weight: 500; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      padding: 12px 16px; background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .section-body { padding: 0; }
+
+    /* ── Tables ── */
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      padding: 9px 14px; font-size: 11px; font-weight: 500;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+    tbody td {
+      padding: 9px 14px; border-bottom: 1px solid var(--border);
+      font-size: 13px; color: var(--text);
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--surface); }
+    .num  { text-align: right; font-variant-numeric: tabular-nums; }
+    .lbl  { color: var(--muted); }
+    .pos  { color: var(--green); font-weight: 500; }
+    .neg  { color: var(--red);   font-weight: 500; }
+
+    /* ── News ── */
+    .news-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 24px; }
+    .news-item {
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 14px; display: flex; flex-direction: column; gap: 6px;
+      transition: box-shadow 0.12s;
+    }
+    .news-item:hover { box-shadow: 0 1px 6px rgba(0,0,0,0.1); }
+    .news-src   { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+    .news-title a { font-size: 13px; font-weight: 500; color: var(--text); text-decoration: none; line-height: 1.45; }
+    .news-title a:hover { color: var(--blue); }
+    .news-date  { font-size: 11px; color: var(--muted); margin-top: auto; }
+
+    /* ── Filings badge ── */
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 12px;
+      font-size: 11px; font-weight: 600;
+      background: #e8f0fe; color: var(--blue);
+    }
+
+    .err { color: var(--red); font-size: 12px; padding: 16px; text-align: center; }
+
+    /* ── Responsive ── */
+    @media (max-width: 860px) {
+      .kpi-grid { grid-template-columns: repeat(2,1fr); }
+      .two-col  { grid-template-columns: 1fr; }
+      .news-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 540px) {
+      .price-main { font-size: 30px; }
+      .news-grid  { grid-template-columns: 1fr; }
+      .range-btn  { padding: 5px 8px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <div style="color:var(--muted);font-size:13px">Loading AAPL…</div>
+</div>
+
+<div id="app">
+  <div class="page">
+
+    <!-- Company + price header -->
+    <div class="co-name">Apple Inc. (AAPL)</div>
+    <div class="price-row">
+      <span class="price-main" id="hPrice">—</span>
+      <span class="price-change" id="hChange">—</span>
+    </div>
+    <div class="price-meta" id="hMeta"></div>
+
+    <hr class="divider">
+
+    <!-- Price chart -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div style="font-size:14px;font-weight:500;color:var(--secondary)">Price History</div>
+        <div class="range-selector" id="rangeSelector">
+          <button class="range-btn" data-range="1D">1D</button>
+          <button class="range-btn" data-range="5D">5D</button>
+          <button class="range-btn" data-range="1M">1M</button>
+          <button class="range-btn active" data-range="6M">6M</button>
+          <button class="range-btn" data-range="YTD">YTD</button>
+          <button class="range-btn" data-range="1Y">1Y</button>
+          <button class="range-btn" data-range="5Y">5Y</button>
+          <button class="range-btn" data-range="All">All</button>
+        </div>
+      </div>
+      <div class="chart-wrap" id="chartWrap">
+        <div id="chartLoading" class="chart-overlay loading" style="display:none">
+          <div class="spinner"></div>
+        </div>
+        <div id="chartNoData" class="chart-overlay" style="display:none">
+          <span style="color:var(--muted);font-size:13px">No data available for this range</span>
+        </div>
+        <canvas id="priceChart"></canvas>
+      </div>
+    </div>
+
+    <!-- KPI strip -->
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Revenue (TTM)</div>
+        <div class="kpi-value" id="kRevenue">—</div>
+        <div class="kpi-sub">Trailing 12 months</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Net Income (TTM)</div>
+        <div class="kpi-value" id="kNetIncome">—</div>
+        <div class="kpi-sub">Trailing 12 months</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">EPS Diluted</div>
+        <div class="kpi-value" id="kEPS">—</div>
+        <div class="kpi-sub">Latest quarter</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Free Cash Flow</div>
+        <div class="kpi-value" id="kFCF">—</div>
+        <div class="kpi-sub">Latest quarter</div>
+      </div>
+    </div>
+
+    <!-- Income + Balance -->
+    <div class="two-col">
+      <div class="section">
+        <div class="section-title">Income Statement (Quarterly)</div>
+        <div class="section-body" id="incomeTable"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">Balance Sheet (Latest Quarter)</div>
+        <div class="section-body" id="balanceTable"></div>
+      </div>
+    </div>
+
+    <!-- Cash Flow + Filings -->
+    <div class="two-col">
+      <div class="section">
+        <div class="section-title">Cash Flow (Quarterly)</div>
+        <div class="section-body" id="cashTable"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">SEC Filings</div>
+        <div class="section-body" id="filingsTable"></div>
+      </div>
+    </div>
+
+    <!-- News -->
+    <div style="font-size:13px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">Latest News</div>
+    <div class="news-grid" id="newsGrid"></div>
+
+  </div><!-- /page -->
+</div><!-- /app -->
+
+<script>
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  const fmtDate = s => {
+    if (!s) return 'N/A';
+    const d = new Date(s.includes('T') ? s : s + 'T12:00:00');
+    return isNaN(d) ? s : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  const fmtMoney = v => {
+    if (v == null) return 'N/A';
+    const abs = Math.abs(v), sign = v < 0 ? '-' : '';
+    if (abs >= 1e12) return `${sign}$${(abs/1e12).toFixed(2)}T`;
+    if (abs >= 1e9)  return `${sign}$${(abs/1e9).toFixed(2)}B`;
+    if (abs >= 1e6)  return `${sign}$${(abs/1e6).toFixed(2)}M`;
+    return `${sign}$${abs.toFixed(2)}`;
+  };
+
+  const fmtPct = v => v == null ? 'N/A' : `${(v * 100).toFixed(1)}%`;
+  const cls    = v => v == null ? '' : v >= 0 ? 'pos' : 'neg';
+
+  const qLabel = s => {
+    const raw = s.calendar_date || s.report_date || s.period_of_report || s.date || '';
+    const d = new Date(raw.includes('T') ? raw : raw + 'T12:00:00');
+    return isNaN(d) ? raw : `Q${Math.ceil((d.getMonth()+1)/3)} '${d.getFullYear().toString().slice(2)}`;
+  };
+
+  // ── Chart range config ────────────────────────────────────────────────────
+
+  const RANGES = {
+    '1D':  { days: 7,    interval: 'day',   mult: 1 },
+    '5D':  { days: 14,   interval: 'day',   mult: 1 },
+    '1M':  { days: 30,   interval: 'day',   mult: 1 },
+    '6M':  { days: 182,  interval: 'day',   mult: 1 },
+    'YTD': { ytd: true,  interval: 'day',   mult: 1 },
+    '1Y':  { days: 365,  interval: 'day',   mult: 1 },
+    '5Y':  { days: 1825, interval: 'week',  mult: 1 },
+    'All': { from: '1980-01-01', interval: 'month', mult: 1 },
+  };
+
+  function xLabel(timeStr, range) {
+    const d = new Date(timeStr.includes('T') ? timeStr : timeStr + 'T12:00:00');
+    const mon = d.toLocaleString('en-US', { month: 'short' });
+    if (['1D', '5D', '1M', '6M', 'YTD'].includes(range)) return `${mon} ${d.getDate()}`;
+    return `${mon} '${String(d.getFullYear()).slice(2)}`;
+  }
+
+  let chartInstance = null;
+
+  async function loadChart(range) {
+    const cfg   = RANGES[range];
+    const today = new Date();
+    const end   = today.toISOString().split('T')[0];
+    let start;
+    if (cfg.from) {
+      start = cfg.from;
+    } else if (cfg.ytd) {
+      start = `${today.getFullYear()}-01-01`;
+    } else {
+      const s = new Date(today);
+      s.setDate(s.getDate() - cfg.days);
+      start = s.toISOString().split('T')[0];
+    }
+
+    const loadEl   = document.getElementById('chartLoading');
+    const noDataEl = document.getElementById('chartNoData');
+    loadEl.style.display   = 'flex';
+    noDataEl.style.display = 'none';
+
+    try {
+      const url  = `/api/prices/?ticker=AAPL&interval=${cfg.interval}&interval_multiplier=${cfg.mult}&start_date=${start}&end_date=${end}`;
+      const data = await fetch(url).then(r => r.json());
+      const raw  = (data?.prices || []).sort((a, b) => new Date(a.time) - new Date(b.time));
+
+      if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+
+      if (!raw.length) {
+        noDataEl.style.display = 'flex';
+        return;
+      }
+
+      const labels  = raw.map(p => xLabel(p.time, range));
+      const closes  = raw.map(p => p.close);
+      const volumes = raw.map(p => p.volume);
+      const maxTicks = raw.length > 200 ? 8 : raw.length > 60 ? 10 : 12;
+
+      const ctx  = document.getElementById('priceChart').getContext('2d');
+      const grad = ctx.createLinearGradient(0, 0, 0, 280);
+      grad.addColorStop(0, 'rgba(11,128,67,0.18)');
+      grad.addColorStop(1, 'rgba(11,128,67,0)');
+
+      chartInstance = new Chart(ctx, {
+        data: {
+          labels,
+          datasets: [
+            {
+              type: 'line', label: 'Close', data: closes,
+              borderColor: '#0b8043', backgroundColor: grad,
+              borderWidth: 1.8, fill: true, tension: 0.15,
+              pointRadius: 0, yAxisID: 'yP', order: 1,
+            },
+            {
+              type: 'bar', label: 'Volume', data: volumes,
+              backgroundColor: 'rgba(11,128,67,0.1)',
+              borderColor: 'transparent',
+              yAxisID: 'yV', order: 2,
+            }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#fff',
+              borderColor: '#e0e0e0', borderWidth: 1,
+              titleColor: '#80868b', bodyColor: '#202124',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              padding: 10,
+              callbacks: {
+                label: c => c.datasetIndex === 0
+                  ? ` $${c.parsed.y.toFixed(2)}`
+                  : ` Vol: ${(c.parsed.y / 1e6).toFixed(1)}M`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(0,0,0,0.04)', borderDash: [2,2] },
+              ticks: { color: '#80868b', maxTicksLimit: maxTicks, maxRotation: 0, font: { size: 11 } }
+            },
+            yP: {
+              position: 'right',
+              grid: { color: 'rgba(0,0,0,0.04)', borderDash: [2,2] },
+              ticks: { color: '#80868b', font: { size: 11 }, callback: v => `$${v}` }
+            },
+            yV: {
+              position: 'left', grid: { display: false },
+              ticks: { display: false },
+              max: Math.max(...volumes) * 5,
+            }
+          }
+        }
+      });
+    } finally {
+      loadEl.style.display = 'none';
+    }
+  }
+
+  document.getElementById('rangeSelector').addEventListener('click', async e => {
+    const btn = e.target.closest('.range-btn');
+    if (!btn) return;
+    document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    await loadChart(btn.dataset.range);
+  });
+
+  // ── Data Fetching ─────────────────────────────────────────────────────────
+
+  async function fetchAll() {
+    const urls = [
+      '/api/prices/snapshot/?ticker=AAPL',
+      '/api/financials/income-statements/?ticker=AAPL&period=quarterly&limit=4',
+      '/api/financials/balance-sheets/?ticker=AAPL&period=quarterly&limit=1',
+      '/api/financials/cash-flow-statements/?ticker=AAPL&period=quarterly&limit=4',
+      '/api/news/?ticker=AAPL',
+      '/api/filings/?ticker=AAPL&limit=8',
+    ];
+    const settled = await Promise.allSettled(urls.map(u => fetch(u).then(r => r.json())));
+    return settled.map(r => r.status === 'fulfilled' ? r.value : null);
+  }
+
+  // ── Renderers ─────────────────────────────────────────────────────────────
+
+  function renderHeader(snap) {
+    const s = snap?.snapshot;
+    if (!s) return;
+    const price  = s.price ?? s.close ?? 0;
+    const open   = s.open  ?? price;
+    const change = price - open;
+    const pct    = open ? (change / open) * 100 : 0;
+    document.getElementById('hPrice').textContent = `$${price.toFixed(2)}`;
+    const el = document.getElementById('hChange');
+    el.textContent = `${change >= 0 ? '+' : ''}$${change.toFixed(2)} (${change >= 0 ? '+' : ''}${pct.toFixed(2)}%)`;
+    el.className = `price-change ${change >= 0 ? 'up' : 'down'}`;
+    document.getElementById('hMeta').textContent = `As of ${fmtDate(s.time || s.date)}`;
+  }
+
+  function renderKPIs(income, cash) {
+    const stmts = income?.income_statements || [];
+    const flows = cash?.cash_flow_statements || [];
+    if (stmts.length) {
+      const ttmRev = stmts.reduce((s, x) => s + (x.revenue    || 0), 0);
+      const ttmNI  = stmts.reduce((s, x) => s + (x.net_income || 0), 0);
+      const eps    = stmts[0]?.eps_diluted ?? stmts[0]?.eps ?? null;
+      document.getElementById('kRevenue').textContent  = fmtMoney(ttmRev);
+      const niEl = document.getElementById('kNetIncome');
+      niEl.textContent = fmtMoney(ttmNI);
+      niEl.className = `kpi-value ${cls(ttmNI)}`;
+      document.getElementById('kEPS').textContent = eps != null ? `$${eps.toFixed(2)}` : 'N/A';
+    }
+    if (flows.length) {
+      const fcf   = flows[0]?.free_cash_flow ?? null;
+      const fcfEl = document.getElementById('kFCF');
+      fcfEl.textContent = fmtMoney(fcf);
+      if (fcf != null) fcfEl.className = `kpi-value ${cls(fcf)}`;
+    }
+  }
+
+  function renderIncome(data) {
+    const stmts = data?.income_statements || [];
+    const el = document.getElementById('incomeTable');
+    if (!stmts.length) { el.innerHTML = '<div class="err">No data</div>'; return; }
+    const rows = [
+      { lbl: 'Revenue',          key: 'revenue' },
+      { lbl: 'Gross Profit',     key: 'gross_profit' },
+      { lbl: 'Operating Income', key: 'operating_income' },
+      { lbl: 'Net Income',       key: 'net_income' },
+      { lbl: 'EPS Diluted',      key: 'eps_diluted', fmt: v => v != null ? `$${v.toFixed(2)}` : 'N/A' },
+      { lbl: 'Gross Margin',     ratio: ['gross_profit', 'revenue'] },
+      { lbl: 'Operating Margin', ratio: ['operating_income', 'revenue'] },
+      { lbl: 'Net Margin',       ratio: ['net_income', 'revenue'] },
+    ];
+    const ths = stmts.map(s => `<th class="num">${qLabel(s)}</th>`).join('');
+    let html = `<table><thead><tr><th>Metric</th>${ths}</tr></thead><tbody>`;
+    for (const r of rows) {
+      html += `<tr><td class="lbl">${r.lbl}</td>`;
+      for (const s of stmts) {
+        if (r.ratio) {
+          const pct = s[r.ratio[1]] ? s[r.ratio[0]] / s[r.ratio[1]] : null;
+          html += `<td class="num ${cls(pct)}">${fmtPct(pct)}</td>`;
+        } else if (r.fmt) {
+          html += `<td class="num">${r.fmt(s[r.key])}</td>`;
+        } else {
+          const v = s[r.key];
+          html += `<td class="num ${cls(v)}">${fmtMoney(v)}</td>`;
+        }
+      }
+      html += '</tr>';
+    }
+    html += '</tbody></table>';
+    el.innerHTML = html;
+  }
+
+  function renderBalance(data) {
+    const sheets = data?.balance_sheets || [];
+    const el = document.getElementById('balanceTable');
+    if (!sheets.length) { el.innerHTML = '<div class="err">No data</div>'; return; }
+    const s = sheets[0];
+    const rows = [
+      { lbl: 'Cash & Equivalents',   key: 'cash_and_equivalents' },
+      { lbl: 'Current Assets',       key: 'current_assets' },
+      { lbl: 'Total Assets',         key: 'total_assets' },
+      { lbl: 'Current Liabilities',  key: 'current_liabilities' },
+      { lbl: 'Total Liabilities',    key: 'total_liabilities' },
+      { lbl: 'Total Debt',           key: 'total_debt' },
+      { lbl: "Stockholders' Equity", key: 'stockholders_equity' },
+    ];
+    let html = `<table><thead><tr><th>Item</th><th class="num">${fmtDate(s.calendar_date || s.date)}</th></tr></thead><tbody>`;
+    for (const r of rows) html += `<tr><td class="lbl">${r.lbl}</td><td class="num">${fmtMoney(s[r.key])}</td></tr>`;
+    const cr = s.current_assets && s.current_liabilities ? (s.current_assets / s.current_liabilities).toFixed(2) : 'N/A';
+    const de = s.total_debt && s.stockholders_equity     ? (s.total_debt / s.stockholders_equity).toFixed(2) : 'N/A';
+    html += `<tr><td class="lbl">Current Ratio</td><td class="num">${cr}</td></tr>`;
+    html += `<tr><td class="lbl">Debt / Equity</td><td class="num">${de}</td></tr>`;
+    html += '</tbody></table>';
+    el.innerHTML = html;
+  }
+
+  function renderCash(data) {
+    const flows = data?.cash_flow_statements || [];
+    const el = document.getElementById('cashTable');
+    if (!flows.length) { el.innerHTML = '<div class="err">No data</div>'; return; }
+    const rows = [
+      { lbl: 'Operating CF',         key: 'operating_cash_flow' },
+      { lbl: 'Capital Expenditures', key: 'capital_expenditures' },
+      { lbl: 'Free Cash Flow',       key: 'free_cash_flow' },
+      { lbl: 'Investing CF',         key: 'investing_cash_flow' },
+      { lbl: 'Financing CF',         key: 'financing_cash_flow' },
+    ];
+    const ths = flows.map(f => `<th class="num">${qLabel(f)}</th>`).join('');
+    let html = `<table><thead><tr><th>Metric</th>${ths}</tr></thead><tbody>`;
+    for (const r of rows) {
+      html += `<tr><td class="lbl">${r.lbl}</td>`;
+      for (const f of flows) {
+        const v = f[r.key];
+        html += `<td class="num ${cls(v)}">${fmtMoney(v)}</td>`;
+      }
+      html += '</tr>';
+    }
+    html += '</tbody></table>';
+    el.innerHTML = html;
+  }
+
+  function renderNews(data) {
+    const articles = (data?.news || []).slice(0, 6);
+    const el = document.getElementById('newsGrid');
+    if (!articles.length) { el.innerHTML = '<div class="err">No news available</div>'; return; }
+    el.innerHTML = articles.map(a => `
+      <div class="news-item">
+        <div class="news-src">${a.source || 'News'}</div>
+        <div class="news-title"><a href="${a.url || '#'}" target="_blank" rel="noopener">${a.title || 'Untitled'}</a></div>
+        <div class="news-date">${fmtDate(a.published_at || a.date || a.time)}</div>
+      </div>
+    `).join('');
+  }
+
+  function renderFilings(data) {
+    const filings = data?.filings || [];
+    const el = document.getElementById('filingsTable');
+    if (!filings.length) { el.innerHTML = '<div class="err">No filings available</div>'; return; }
+    let html = '<table><thead><tr><th>Type</th><th>Filed</th><th>Period</th><th></th></tr></thead><tbody>';
+    for (const f of filings) {
+      const url = f.report_url || f.url || '#';
+      html += `<tr>
+        <td><span class="badge">${f.filing_type || 'N/A'}</span></td>
+        <td>${fmtDate(f.filing_date || f.date)}</td>
+        <td>${fmtDate(f.period_of_report || f.period)}</td>
+        <td><a href="${url}" target="_blank" rel="noopener" style="color:var(--blue);text-decoration:none;font-size:12px">View</a></td>
+      </tr>`;
+    }
+    html += '</tbody></table>';
+    el.innerHTML = html;
+  }
+
+  // ── Boot ──────────────────────────────────────────────────────────────────
+
+  (async () => {
+    try {
+      const [snap, income, balance, cash, news, filings] = await fetchAll();
+
+      renderHeader(snap);
+      await loadChart('6M');
+      renderKPIs(income, cash);
+      renderIncome(income);
+      renderBalance(balance);
+      renderCash(cash);
+      renderNews(news);
+      renderFilings(filings);
+
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('app').style.display     = 'block';
+    } catch (err) {
+      document.getElementById('loading').innerHTML =
+        `<div style="color:#c5221f;font-size:14px">Failed to load: ${err.message}</div>`;
+    }
+  })();
+</script>
+</body>
+</html>
